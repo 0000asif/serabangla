@@ -18,7 +18,15 @@ class HomeController extends Controller
         $cards = Card::latest()->first();
         $reviews = Review::latest()->get();
         $settings = Setting::latest()->first();
-        return view('home.index', compact('hero', 'cards', 'reviews', 'settings'));
+        return view('home.indexupdate', compact('hero', 'cards', 'reviews', 'settings'));
+    }
+    public function masala()
+    {
+        $hero = Hero::latest()->first(); // get the latest hero record
+        $cards = Card::latest()->first();
+        $reviews = Review::latest()->get();
+        $settings = Setting::latest()->first();
+        return view('home.masala', compact('hero', 'cards', 'reviews', 'settings'));
     }
 
 

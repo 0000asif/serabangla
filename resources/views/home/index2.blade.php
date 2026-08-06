@@ -876,15 +876,14 @@
                         <div id="selectedProductContainer" class="selected-product-card" style="display: none;">
                             <h5 class="mb-3">আপনার নির্বাচিত পণ্য:</h5>
                             <div class="d-flex align-items-center">
-                                <img id="selectedProductImage" src="" class="product-thumb me-3"
-                                    alt="Selected Product">
+                                <img id="selectedProductImage" src="" class="product-thumb me-3" alt="Selected Product">
                                 <div class="flex-grow-1">
                                     <h5 id="selectedProductName" class="mb-1"></h5>
                                     <p id="selectedProductPrice" class="text-primary fw-bold mb-2"></p>
                                     <div class="quantity-selector">
                                         <button class="quantity-btn" id="decreaseQty">-</button>
-                                        <input type="number" id="productQty" class="quantity-input" value="1"
-                                            min="1" max="10">
+                                        <input type="number" id="productQty" class="quantity-input" value="1" min="1"
+                                            max="10">
                                         <button class="quantity-btn" id="increaseQty">+</button>
                                         <span class="ms-3">টুকরা</span>
                                     </div>
@@ -911,7 +910,8 @@
                                 </div>
                                 <div class="col-12">
                                     <label class="form-label">পুরো ঠিকানা *</label>
-                                    <textarea class="form-control" rows="3" placeholder="বাড়ি নম্বর, রাস্তা, এলাকা, জেলা" required></textarea>
+                                    <textarea class="form-control" rows="3"
+                                        placeholder="বাড়ি নম্বর, রাস্তা, এলাকা, জেলা" required></textarea>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">জেলা *</label>
@@ -940,8 +940,8 @@
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" id="agreeTerms" required>
                                         <label class="form-check-label" for="agreeTerms">
-                                            আমি <a href="#" class="text-primary">শর্তাবলী</a> এবং <a
-                                                href="#" class="text-primary">প্রাইভেসি পলিসি</a> মেনে অর্ডার
+                                            আমি <a href="#" class="text-primary">শর্তাবলী</a> এবং <a href="#"
+                                                class="text-primary">প্রাইভেসি পলিসি</a> মেনে অর্ডার
                                             দিচ্ছি
                                         </label>
                                     </div>
@@ -1039,7 +1039,7 @@
         let selectedProduct = null;
 
         document.querySelectorAll('.select-btn').forEach(button => {
-            button.addEventListener('click', function() {
+            button.addEventListener('click', function () {
                 // Reset all buttons
                 document.querySelectorAll('.select-btn').forEach(btn => {
                     btn.classList.remove('selected-btn');
@@ -1081,7 +1081,7 @@
         }
 
         // Quantity controls
-        document.getElementById('increaseQty').addEventListener('click', function() {
+        document.getElementById('increaseQty').addEventListener('click', function () {
             let qtyInput = document.getElementById('productQty');
             let currentQty = parseInt(qtyInput.value);
             if (currentQty < 10) {
@@ -1090,7 +1090,7 @@
             }
         });
 
-        document.getElementById('decreaseQty').addEventListener('click', function() {
+        document.getElementById('decreaseQty').addEventListener('click', function () {
             let qtyInput = document.getElementById('productQty');
             let currentQty = parseInt(qtyInput.value);
             if (currentQty > 1) {
@@ -1099,7 +1099,7 @@
             }
         });
 
-        document.getElementById('productQty').addEventListener('change', function() {
+        document.getElementById('productQty').addEventListener('change', function () {
             let qty = parseInt(this.value);
             if (qty < 1) this.value = 1;
             if (qty > 10) this.value = 10;
@@ -1115,7 +1115,7 @@
         }
 
         // Remove selected product
-        document.getElementById('removeProduct').addEventListener('click', function() {
+        document.getElementById('removeProduct').addEventListener('click', function () {
             document.getElementById('selectedProductContainer').style.display = 'none';
             selectedProduct = null;
 
@@ -1127,7 +1127,7 @@
         });
 
         // Form submission
-        document.getElementById('orderForm').addEventListener('submit', function(e) {
+        document.getElementById('orderForm').addEventListener('submit', function (e) {
             e.preventDefault();
 
             if (!selectedProduct) {
@@ -1165,7 +1165,7 @@
 
         // Smooth scrolling for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
+            anchor.addEventListener('click', function (e) {
                 e.preventDefault();
 
                 const targetId = this.getAttribute('href');

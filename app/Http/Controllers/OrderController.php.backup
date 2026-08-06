@@ -1,0 +1,198 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Order;
+use App\Models\OrderItem;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use Carbon\Carbon;
+
+class OrderController extends Controller
+{
+
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'customer_name' => 'required|string|max:255',
+            'customer_phone' => 'required|string|max:20',
+            'customer_address' => 'required|string',
+            'subtotal' => 'required|numeric',
+            'total' => 'required|numeric',
+            'product' => 'required',
+        ]);
+
+        $order = Order::create([
+            'order_id' => 'SB-' . now()->timestamp,
+            'customer_name' => $request->customer_name,
+            'customer_phone' => $request->customer_phone,
+            'customer_address' => $request->customer_address,
+            'order_note' => $request->order_note,
+            'subtotal' => $request->subtotal,
+            'total' => $request->total,
+            'order_date' => now(),
+            'product' => $request->product,
+        ]);
+
+        // 4️⃣ Redirect back with success message
+        return redirect()->back()->with('success', 'আপনার অর্ডার গ্রহণ করা হয়েছে! আমাদের প্রতিনিধি শিগগিরই যোগাযোগ করে আপনার অর্ডার কনফার্ম করবে ।');
+    }
+
+
+    public function index()
+    {
+        $orders = Order::orderby('id', 'desc')->get();
+        return view('admin.orders.index', compact('orders'));
+    }
+
+    public function show($id)
+    {
+        $order = Order::with('items')->findOrFail($id);
+        return view('admin.orders.show', compact('order'));
+    }
+
+    public function updateStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|in:pending,processing,completed,cancelled'
+        ]);
+
+        $order = Order::findOrFail($id);
+        $order->user_id = auth()->user()->id;
+        $order->status = $request->status;
+        $order->save();
+
+        return redirect()->back()->with('success', 'Order status updated successfully.');
+    }
+
+    public function dashboard(Request $request)
+    {
+        $query = Order::query()->with('user');
+
+        if ($request->filled('from_date')) {
+            $query->whereDate('created_at', '>=', $request->from_date);
+        }
+
+        if ($request->filled('to_date')) {
+            $query->whereDate('created_at', '<=', $request->to_date);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('user_id')) {
+            $query->where('user_id', $request->user_id);
+        }
+
+        // Clone query for statistics
+        $statsQuery = clone $query;
+
+        $totalOrders = $statsQuery->count();
+
+        $pendingOrders = (clone $query)
+            ->where('status', 'pending')
+            ->count();
+
+        $processingOrders = (clone $query)
+            ->where('status', 'processing')
+            ->count();
+
+        $completedOrders = (clone $query)
+            ->where('status', 'completed')
+            ->count();
+
+        $cancelledOrders = (clone $query)
+            ->where('status', 'cancelled')
+            ->count();
+
+        $totalSales = (clone $query)
+
+            ->where('status', 'completed')->sum('total');
+
+        $todayOrders = Order::whereDate('created_at', today())
+            ->count();
+
+        $orders = $query
+            ->latest()
+            ->paginate(20);
+
+        $users = User::orderBy('name')->get();
+
+        return view('admin.dashboard', compact(
+            'orders',
+            'users',
+            'todayOrders',
+            'totalOrders',
+            'pendingOrders',
+            'processingOrders',
+            'completedOrders',
+            'cancelledOrders',
+            'totalSales'
+        ));
+    }
+
+    public function export(Request $request)
+    {
+        $filename = 'orders.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=$filename",
+        ];
+
+        $callback = function () use ($request) {
+
+            $file = fopen('php://output', 'w');
+
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+            fputcsv($file, [
+                'Order ID',
+                'Product',
+                'Agent',
+                'Customer',
+                'Phone',
+                'Total',
+                'Status'
+            ]);
+
+            $query = Order::with('user');
+
+            if ($request->filled('from_date')) {
+                $query->whereDate('created_at', '>=', $request->from_date);
+            }
+
+            if ($request->filled('to_date')) {
+                $query->whereDate('created_at', '<=', $request->to_date);
+            }
+
+            if ($request->filled('status')) {
+                $query->where('status', $request->status);
+            }
+
+            if ($request->filled('user_id')) {
+                $query->where('user_id', $request->user_id);
+            }
+
+            foreach ($query->get() as $order) {
+
+                fputcsv($file, [
+                    $order->order_id,
+                    $order->product,
+                    $order->user->name ?? '',
+                    $order->customer_name,
+                    $order->customer_phone,
+                    $order->total,
+                    $order->status
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+}

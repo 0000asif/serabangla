@@ -8,6 +8,12 @@
     <meta name="keywords"
         content="admin template, angular admin template, bootstrap admin template, modern admin template, modern design admin template, dashboard template, responsive admin template, angular web app, crypto dashboard, bitcoin dashboard">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon_io/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon_io/favicon-16x16.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('favicon_io/apple-touch-icon.png') }}">
+    <link rel="manifest" href="{{ asset('favicon_io/site.webmanifest') }}">
+
     <title>Admin | Dashboard</title>
     <!-- GLOBAL VENDORS-->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700" media="all">
@@ -109,8 +115,8 @@
                 <footer class="page-footer flexbox">
                     <div class="text-muted">
                         <?php echo date('Y') ?> © <strong>copyrights</strong>. All rights reserved
-                    </div><a class="btn btn-primary btn-rounded" href="https://facebook.com/mdasifraj.moyna"
-                        target="_blank">Design & Developed By Asif Hossain</a>
+                    </div><a class="btn btn-primary btn-rounded" href="www.wetechhub.com"
+                        target="_blank">Design & Developed By wetechhub</a>
                 </footer><!-- END: Footer-->
             </div><!-- END: Content-->
         </div>

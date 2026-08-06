@@ -1,19 +1,34 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\BasicController;
 use App\Http\Controllers\CardController;
+use App\Http\Controllers\GiftController;
 use App\Http\Controllers\HeroController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\BasicController;
 use App\Http\Controllers\OrderController;
-use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\PolicyController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SettingController;
-use App\Http\Controllers\PolicyController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserPermissionController;
-use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use Illuminate\Support\Facades\Route;
+use App\Models\Customer;
 
+// ============================================
+// ✅ ব্লক ইউজার চেক করার Route
+// ============================================
+Route::post('/check-user-blocked', function (Request $request) {
+    $phone = $request->phone;
+    $customer = Customer::where('phone', $phone)->first();
+
+    return response()->json([
+        'blocked' => $customer && $customer->blocked == 1,
+        'message' => $customer && $customer->blocked == 1 ? 'আপনার অ্যাকাউন্ট ব্লক করা হয়েছে।' : null
+    ]);
+})->name('check.user.blocked');
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -25,10 +40,18 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 |
 */
 
-Route::get('/', [HomeController::class, 'index'])->name('home');
-route::get('index', function () {
-    return view('home.index2');
+Route::get('/test-confirmation-fix', function () {
+    $service = new \App\Services\SalesConfirmationService();
+
+    // Test with string value
+    $result = $service->sendConfirmation('01758040074', '4', 'TEST-ORDER-' . time());
+
+    return response()->json($result);
 });
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/masala', [HomeController::class, 'masala'])->name('masala');
+
+
 Route::get('/terms', function () {
     $policy = \App\Models\Policy::where('type', 'terms')->first();
     return view('home.policy', compact('policy'));
@@ -44,18 +67,32 @@ Route::post('/order', [OrderController::class, 'store'])->name('order.store');
 Route::get('/admin/login', [AuthenticatedSessionController::class, 'create'])->name('login');
 Route::post('login', [AuthenticatedSessionController::class, 'store'])->name('userlogin');
 
-Route::get('/dashboard', function () {
-    return view('admin.dashboard');
-    // return view('index');
-})->middleware(['auth'])->name('dashboard');
+Route::post('/gift/validate', [OrderController::class, 'validateGift'])->name('gift.validate');
 
 Route::middleware('auth')->group(function () {
+    // Order routes
     Route::get('orders', [OrderController::class, 'index'])->name('admin.orders');
     Route::get('orders/{id}', [OrderController::class, 'show'])->name('admin.order.show');
     Route::post('orders/{id}/status', [OrderController::class, 'updateStatus'])->name('admin.order.updateStatus');
+    Route::delete('orders/{id}', [OrderController::class, 'destroy'])->name('admin.order.destroy');
+    // update Order
+    Route::put('/order/update-full/{id}', [OrderController::class, 'updateFullOrder'])->name('admin.order.updateFull');
+
+    // Bulk delete route (optional)
+    Route::delete('orders/bulk-delete', [OrderController::class, 'bulkDelete'])->name('admin.order.bulkDelete');
 
     Route::get('newform', [BasicController::class, 'newform']);
     Route::get('datatables', [BasicController::class, 'datatables']);
+
+    Route::get('/dashboard', [OrderController::class, 'dashboard'])
+        ->name('dashboard');
+
+    Route::get('/admin/orders/export', [OrderController::class, 'export'])
+        ->name('admin.orders.export');
+
+    Route::get('/gift/import', [OrderController::class, 'importView'])->name('gift.import.view');
+    Route::get('/gift', [OrderController::class, 'giftview'])->name('gift.index');
+    Route::post('/gift/import', [OrderController::class, 'import'])->name('gift.import');
 
     Route::prefix('admin')->name('admin.')->group(function () {
 
@@ -71,6 +108,22 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/products/{id}/delete-image', [ProductController::class, 'deleteImage'])
             ->name('product.image.delete');
+
+        // ============================================
+        // Customer Management Routes (নতুন)
+        // ============================================
+        Route::get('/customers', [OrderController::class, 'index'])->name('customers');
+        Route::post('/customer/block-from-order/{orderId}', [OrderController::class, 'blockFromOrder'])->name('customer.block-from-order');
+        Route::put('/customer/unblock/{id}', [OrderController::class, 'unblock'])->name('customer.unblock');
+        Route::put('/customer/toggle-block/{id}', [OrderController::class, 'toggleBlock'])->name('customer.toggle-block');
+
+
+        Route::post('/block-user-from-order/{id}', [OrderController::class, 'blockUserFromOrder'])
+            ->name('admin.block-user-from-order');
+
+        Route::post('/block-user-by-phone', [OrderController::class, 'blockUserByPhone'])
+            ->name('admin.block-user-by-phone');
+
     });
 
     Route::get('/admin/hero/', [HeroController::class, 'edit'])->name('hero.edit');
@@ -81,18 +134,21 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/settings', [SettingController::class, 'edit'])->name('settings.edit');
     Route::post('/admin/settings/update', [SettingController::class, 'update'])->name('settings.update');
     Route::resource('reviews', ReviewController::class);
+    Route::resource('user', UserController::class);
 
- Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.update.password');
-    
+
     Route::get('/admin/policies/{type}/edit', [PolicyController::class, 'edit'])->name('admin.policies.edit');
     Route::put('/admin/policies/{type}', [PolicyController::class, 'update'])->name('admin.policies.update');
 
 
-
 });
+
 Route::get('/products-json', [ProductController::class, 'productsJson'])
     ->name('products.json');
+// routes/api.php বা web.php তে যোগ করুন
+Route::post('/recall-order', [OrderController::class, 'recallOrder'])->name('recall.order');
 
 require __DIR__ . '/auth.php';

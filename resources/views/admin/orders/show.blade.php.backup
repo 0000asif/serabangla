@@ -1,0 +1,180 @@
+@extends('admin.masterAdmin')
+@section('content')
+    <style>
+        @media print {
+
+            .card-header,
+            .btn,
+            .sidebar,
+            .navbar {
+                display: none !important;
+            }
+
+            body {
+                background: #fff !important;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            table,
+            th,
+            td {
+                border: 1px solid #000;
+            }
+
+            th,
+            td {
+                padding: 8px;
+            }
+        }
+    </style>
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+
+            <h5 class="mb-0">
+                Order Details - {{ $order->order_id }}
+            </h5>
+
+            <div>
+
+                <button type="button" onclick="printOrder()" class="btn btn-success btn-sm me-2">
+                    Print
+                </button>
+
+                <a href="{{ route('admin.orders') }}" class="btn btn-secondary btn-sm">
+                    Back
+                </a>
+
+            </div>
+
+        </div>
+        <div class="card-body" id="printArea">
+
+            <div class="text-center mb-4">
+                <h3>সেরা বাংলা ৬৪</h3>
+                <p class="mb-0">Customer Order Details</p>
+            </div>
+
+            <div class="row">
+
+                <div class="col-md-6">
+                    <div class="border rounded p-3">
+
+                        <h6 class="fw-bold mb-3">Customer Information</h6>
+
+                        <p><strong>Order ID:</strong> {{ $order->order_id }}</p>
+                        <p><strong>Name:</strong> {{ $order->customer_name }}</p>
+                        <p><strong>Phone:</strong> {{ $order->customer_phone }}</p>
+                        <p><strong>Address:</strong> {{ $order->customer_address }}</p>
+                        <p><strong>Order Note:</strong> {{ $order->order_note }}</p>
+
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="border rounded p-3">
+
+                        <h6 class="fw-bold mb-3">Order Information</h6>
+
+                        <p>
+                            <strong>Date:</strong>
+                            {{ $order->created_at->format('d M Y h:i A') }}
+                        </p>
+
+                        <p>
+                            <strong>Status:</strong>
+
+                            <span class="badge bg-warning">
+                                Pending
+                            </span>
+                        </p>
+
+                        <p>
+                            <strong>Total:</strong>
+                            ৳ {{ number_format($order->total) }}
+                        </p>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <hr>
+
+            <h6 class="mb-3">Product Details</h6>
+
+            <table class="table table-bordered">
+
+                <thead class="table-light">
+                    <tr>
+                        <th width="60">SL</th>
+                        <th>Product</th>
+                        <th width="120">Subtotal</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>{{ $order->product }}</td>
+                        <td>৳ {{ number_format($order->subtotal) }}</td>
+                    </tr>
+                </tbody>
+
+            </table>
+
+            <div class="row justify-content-end">
+
+                <div class="col-md-4">
+
+                    <table class="table">
+
+                        <tr>
+                            <th>Subtotal</th>
+                            <td class="text-end">
+                                ৳ {{ number_format($order->subtotal) }}
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Delivery</th>
+                            <td class="text-end text-success">
+                                Free
+                            </td>
+                        </tr>
+
+                        <tr class="">
+                            <th>Total</th>
+                            <td class="text-end fw-bold">
+                                ৳ {{ number_format($order->total) }}
+                            </td>
+                        </tr>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+    <script>
+        function printOrder() {
+
+            let printContents = document.getElementById('printArea').innerHTML;
+
+            let originalContents = document.body.innerHTML;
+
+            document.body.innerHTML = printContents;
+
+            window.print();
+
+            document.body.innerHTML = originalContents;
+
+            location.reload();
+        }
+    </script>
+@endsection

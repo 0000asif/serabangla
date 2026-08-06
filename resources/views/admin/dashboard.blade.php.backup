@@ -1,0 +1,351 @@
+@extends('admin.masterAdmin')
+
+@section('content')
+    <style>
+        .dashboard-card {
+            border: none;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .dashboard-card .card-body {
+            padding: 25px;
+        }
+
+        .dashboard-card h2 {
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .stats-card {
+            border: none;
+            border-left: 5px solid;
+            border-radius: 10px;
+        }
+
+        .table th {
+            white-space: nowrap;
+        }
+
+        .badge {
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+
+        .filter-card {
+            border: none;
+            border-radius: 12px;
+        }
+    </style>
+
+    <div class="page-heading mb-4">
+        <div class="page-breadcrumb">
+            <h1 class="page-title">Dashboard</h1>
+        </div>
+    </div>
+
+    @include('components.alert')
+
+    {{-- TOP KPI --}}
+
+    <div class="row mb-4">
+
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card dashboard-card bg-primary text-white shadow">
+                <div class="card-body">
+                    <small>Today's Orders</small>
+                    <h2>{{ $todayOrders }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card dashboard-card bg-success text-white shadow">
+                <div class="card-body">
+                    <small>Total Orders</small>
+                    <h2>{{ $totalOrders }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card dashboard-card bg-warning shadow">
+                <div class="card-body">
+                    <small>Pending Orders</small>
+                    <h2>{{ $pendingOrders }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card dashboard-card bg-dark text-white shadow">
+                <div class="card-body">
+                    <small>Total Sales</small>
+                    <h2>৳ {{ number_format($totalSales, 2) }}</h2>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+    {{-- REPORT HEADER --}}
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <h3 class="mb-1">Order Reports</h3>
+        </div>
+    </div>
+
+    {{-- FILTER --}}
+
+    <div class="card filter-card shadow-sm mb-4">
+
+
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="fa fa-filter"></i>
+                Filter Reports
+            </h5>
+        </div>
+
+        <div class="card-body">
+
+            <form method="GET">
+
+                <div class="row">
+
+                    <div class="col-md-2 mb-3">
+                        <label>From Date</label>
+                        <input type="date" name="from_date" value="{{ request('from_date') }}" class="form-control">
+                    </div>
+
+                    <div class="col-md-2 mb-3">
+                        <label>To Date</label>
+                        <input type="date" name="to_date" value="{{ request('to_date') }}" class="form-control">
+                    </div>
+
+                    <div class="col-md-2 mb-3">
+                        <label>Status</label>
+                        <select name="status" class="form-control">
+                            <option value="">All Status</option>
+                            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                            <option value="processing" {{ request('status') == 'processing' ? 'selected' : '' }}>Processing
+                            </option>
+                            <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed
+                            </option>
+                            <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label>Agent</label>
+                        <select name="user_id" class="form-control">
+                            <option value="">All Agents</option>
+
+                            @foreach ($users as $user)
+                                <option value="{{ $user->id }}"
+                                    {{ request('user_id') == $user->id ? 'selected' : '' }}>
+                                    {{ $user->name }}
+                                </option>
+                            @endforeach
+
+                        </select>
+                    </div>
+
+                    <div class="col-md-3 mb-3 d-flex align-items-end">
+
+                        <button class="btn btn-primary me-2">
+                            <i class="fa fa-search"></i>
+                            Filter
+                        </button>
+
+                        <a href="{{ url()->current() }}" class="btn btn-outline-secondary">
+                            Reset
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+
+    </div>
+
+    {{-- STATUS REPORT --}}
+
+    <div class="row mb-4">
+
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card stats-card shadow-sm" style="border-left-color:#ffc107">
+                <div class="card-body">
+                    <small>Pending</small>
+                    <h3>{{ $pendingOrders }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card stats-card shadow-sm" style="border-left-color:#0dcaf0">
+                <div class="card-body">
+                    <small>Processing</small>
+                    <h3>{{ $processingOrders }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card stats-card shadow-sm" style="border-left-color:#198754">
+                <div class="card-body">
+                    <small>Completed</small>
+                    <h3>{{ $completedOrders }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card stats-card shadow-sm" style="border-left-color:#dc3545">
+                <div class="card-body">
+                    <small>Cancelled</small>
+                    <h3>{{ $cancelledOrders }}</h3>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+    {{-- TABLE --}}
+
+    <div class="card border-0 shadow">
+
+        <div class="card-header bg-white">
+            <div class="d-flex justify-content-between align-items-center w-100">
+
+                <h5 class="mb-0">
+                    Order Report List
+                </h5>
+
+                <a href="{{ route('admin.orders.export', request()->query()) }}" class="btn btn-success">
+                    <i class="fa fa-download"></i>
+                    Export CSV
+                </a>
+
+            </div>
+        </div>
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover table-bordered align-middle">
+
+                    <thead class="table-dark">
+                        <tr>
+                            <th>#</th>
+                            <th>Order ID</th>
+                            <th>Agent</th>
+                            <th>Customer</th>
+                            <th>Phone</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        @forelse($orders as $key => $order)
+                            <tr>
+
+                                <td>{{ $orders->firstItem() + $key }}</td>
+
+                                <td>
+                                    <strong>{{ $order->order_id }}</strong>
+                                </td>
+
+                                <td>{{ $order->user->name ?? 'N/A' }}</td>
+
+                                <td>{{ $order->customer_name }}</td>
+
+                                <td>{{ $order->customer_phone }}</td>
+
+                                <td>
+                                    <strong>
+                                        ৳ {{ number_format($order->total, 2) }}
+                                    </strong>
+                                </td>
+
+                                <td>
+
+                                    @switch($order->status)
+                                        @case('pending')
+                                            <span class="badge bg-warning">Pending</span>
+                                        @break
+
+                                        @case('processing')
+                                            <span class="badge bg-info">Processing</span>
+                                        @break
+
+                                        @case('completed')
+                                            <span class="badge bg-success">Completed</span>
+                                        @break
+
+                                        @default
+                                            <span class="badge bg-danger">Cancelled</span>
+                                    @endswitch
+
+                                </td>
+
+                                <td>
+                                    {{ $order->created_at->format('d M Y h:i A') }}
+                                </td>
+
+                            </tr>
+
+                            @empty
+
+                                <tr>
+                                    <td colspan="8" class="text-center py-4">
+                                        No Data Found
+                                    </td>
+                                </tr>
+                            @endforelse
+
+                            <tr class="table-success">
+
+                                <td colspan="5" class="text-end">
+                                    <strong>Total Amount</strong>
+                                </td>
+
+                                <td>
+                                    <strong class="text-success">
+                                        ৳ {{ number_format($totalSales, 2) }}
+                                    </strong>
+                                </td>
+
+                                <td colspan="2"></td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+            <div class="card-footer bg-white">
+                {{ $orders->withQueryString()->links() }}
+            </div>
+
+
+        </div>
+    @endsection

@@ -30,4 +30,32 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Sales Confirmation API
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for the Sales Confirmation Voice Call API
+    |
+    */
+    'sales_confirmation' => [
+        'url' => env('SALES_CONFIRMATION_API_URL', 'https://voicebox.wetechhub.com/api/sale-confirmation/send-sales-confirmation'),
+        'api_key' => env('SALES_CONFIRMATION_API_KEY', ''),
+        'enabled' => env('SALES_CONFIRMATION_ENABLED', true),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | BD Courier API (Fraud Check)
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for the BD Courier Fraud Check API
+    |
+    */
+    'bd_courier' => [
+        'url' => env('BD_COURIER_API_URL', 'https://api.bdcourier.com/courier-check'),
+        'api_key' => env('BD_COURIER_API_KEY', ''),
+        'enabled' => env('BD_COURIER_ENABLED', true),
+    ],
+
 ];
